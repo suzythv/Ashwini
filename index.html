@@ -1,175 +1,142 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Birthday Surprise 🎂</title>
-  <style>
-    body {
-      margin: 0;
-      background: black;
-      color: white;
-      text-align: center;
-      font-family: Arial;<!DOCTYPE html>
-<html>
-<head>
-  <title>Eva's Birthday 🎂</title>
-  <style>
-    body {
-      margin: 0;
-      background: black;
-      color: white;
-      text-align: center;
-      font-family: Arial;
-      overflow: hidden;
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Heart, Gift, Cake, Music } from "lucide-react";
+import confetti from "canvas-confetti";
+
+export default function BirthdayPage() {
+  const birthday = new Date("2026-08-15T00:00:00");
+
+  const [timeLeft, setTimeLeft] = useState(getTimeLeft());
+  const [page, setPage] = useState("home");
+  const [messageIndex, setMessageIndex] = useState(0);
+
+  const messages = [
+    "You make life way more better 😄",
+    "Thanks for being my crazy friend 😂",
+    "Stay awesome always 💌",
+    "More memories coming soon 🎈"
+  ];
+
+  function getTimeLeft() {
+    const now = new Date();
+    const diff = birthday - now;
+
+    if (diff <= 0) {
+      return { done: true };
     }
 
-    h1 {
-      margin-top: 20%;
-      font-size: 35px;
-    }
-
-    button {
-      padding: 12px 25px;
-      font-size: 18px;
-      margin-top: 20px;
-      background: pink;
-      border: none;
-      cursor: pointer;
-    }
-
-    .balloon {
-      position: absolute;
-      font-size: 30px;
-      animation: float 5s linear infinite;
-    }
-
-    .cat {
-      position: absolute;
-      width: 100px;
-      animation: move 6s linear infinite;
-    }
-
-    @keyframes float {
-      from { top: 100%; }
-      to { top: -10%; }
-    }
-
-    @keyframes move {
-      from { left: -100px; }
-      to { left: 100%; }
-    }
-  </style>
-</head>
-
-<body>
-
-<h1 id="text">💖 Ready for a surprise Eva? 💖</h1>
-<button onclick="nextStep()">Start 🎁</button>
-
-<div id="effects"></div>
-
-<script>
-let step = 0;
-
-function nextStep() {
-  let text = document.getElementById("text");
-  let box = document.getElementById("effects");
-
-  step++;
-
-  if (step === 1) {
-    text.innerHTML = "🎈 Let's decorate!";
-    for (let i = 0; i < 10; i++) {
-      let b = document.createElement("div");
-      b.innerHTML = "🎈";
-      b.className = "balloon";
-      b.style.left = Math.random() * 100 + "%";
-      box.appendChild(b);
-    }
+    return {
+      done: false,
+      days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+      minutes: Math.floor((diff / 1000 / 60) % 60),
+      seconds: Math.floor((diff / 1000) % 60)
+    };
   }
 
-  else if (step === 2) {
-    text.innerHTML = "🎂 Let's make a cake!";
+  useEffect(() => {
+    const timer = setInterval(() => setTimeLeft(getTimeLeft()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  function launchConfetti() {
+    confetti({
+      particleCount: 120,
+      spread: 80,
+      origin: { y: 0.6 }
+    });
   }
 
-  else if (step === 3) {
-    text.innerHTML = "🕯️ Light the candle!";
+  function startSurprise() {
+    launchConfetti();
+    setPage("message");
   }
 
-  else if (step === 4) {
-    text.innerHTML = "👀 Close your eyes & make a wish 💖";
+  function playMusic() {
+    document.getElementById("bgm").play();
   }
 
-  else if (step === 5) {
-    text.innerHTML = "💨 Blow the candle!";
-  }
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200 p-6 text-center">
 
-  else {
-    text.innerHTML = "🎉 Happy Birthday Eva 💖🐱";
+      {/* MUSIC */}
+      <audio id="bgm" loop>
+        <source src="bgm.mp3" type="audio/mpeg" />
+      </audio>
 
-    for (let i = 0; i < 6; i++) {
-      let img = document.createElement("img");
-      img.src = "https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif";
-      img.className = "cat";
-      img.style.top = Math.random() * 400 + "px";
-      box.appendChild(img);
-    }
-  }
+      {/* HOME PAGE */}
+      {page === "home" && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md"
+        >
+          <h1 className="text-3xl font-bold flex items-center justify-center gap-2">
+            <Cake /> Birthday Surprise
+          </h1>
+
+          {!timeLeft.done ? (
+            <p className="mt-4 text-gray-600">
+              Countdown: {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
+            </p>
+          ) : (
+            <p className="text-pink-600 font-bold mt-4">🎉 It's your day!</p>
+          )}
+
+          <button
+            className="mt-4 bg-black text-white px-4 py-2 rounded-full"
+            onClick={startSurprise}
+          >
+            Open Surprise 🎁
+          </button>
+        </motion.div>
+      )}
+
+      {/* MESSAGE PAGE */}
+      {page === "message" && (
+        <motion.div
+          initial={{ scale: 0.8 }}
+          animate={{ scale: 1 }}
+          className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md"
+        >
+          <h2 className="text-2xl font-bold flex items-center justify-center gap-2">
+            <Heart className="text-red-500" /> For You
+          </h2>
+
+          <p className="mt-4 text-lg">{messages[messageIndex]}</p>
+
+          <button
+            className="mt-4 bg-black text-white px-4 py-2 rounded-full"
+            onClick={() => setMessageIndex((p) => (p + 1) % messages.length)}
+          >
+            Next Message ➡️
+          </button>
+
+          <div className="flex gap-2 justify-center mt-4">
+            <button
+              onClick={playMusic}
+              className="bg-pink-500 text-white px-3 py-2 rounded-full flex items-center gap-1"
+            >
+              <Music size={16} /> Play Music
+            </button>
+
+            <button
+              onClick={launchConfetti}
+              className="bg-purple-500 text-white px-3 py-2 rounded-full"
+            >
+              🎊 Confetti
+            </button>
+          </div>
+
+          <button
+            className="mt-4 text-sm underline"
+            onClick={() => setPage("home")}
+          >
+            Back
+          </button>
+        </motion.div>
+      )}
+
+    </div>
+  );
 }
-</script>
-
-</body>
-</html>
-    }
-
-    h1 {
-      margin-top: 20%;
-      font-size: 40px;
-    }
-
-    button {
-      padding: 12px 25px;
-      font-size: 20px;
-      background: pink;
-      border: none;
-      cursor: pointer;
-    }
-
-    .cat {
-      position: absolute;
-      width: 100px;
-      animation: move 5s linear infinite;
-    }
-
-    @keyframes move {
-      from { left: -100px; }
-      to { left: 100%; }
-    }
-  </style>
-</head>
-
-<body>
-
-<h1 id="text">Click the gift 🎁</h1>
-
-<button onclick="showWish()">Open 🎁</button>
-
-<div id="cats"></div>
-
-<script>
-function showWish() {
-  document.getElementById("text").innerHTML = "🐱 Happy Birthday!!! 🎂💖";
-
-  let cats = document.getElementById("cats");
-
-  for (let i = 0; i < 6; i++) {
-    let img = document.createElement("img");
-    img.src = "https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif";
-    img.className = "cat";
-    img.style.top = (Math.random() * 400) + "px";
-    cats.appendChild(img);
-  }
-}
-</script>
-
-</body>
-</html>
